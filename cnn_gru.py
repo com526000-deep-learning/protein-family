@@ -4,9 +4,9 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import GRU
+from keras.layers import GRU, Dense
 from keras.layers import Dropout, MaxPooling1D, Conv1D
-from keras.layers import Embedding. Input
+from keras.layers import Embedding, Input
 from keras.preprocessing import text, sequence
 from keras.preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
@@ -28,7 +28,7 @@ conv1_kernel = 6
 pool1_size = 2
 
 conv2_filter = 64
-conv2_filter = 3
+conv2_kernel = 3
 pool2_size = 2
 
 GRU_output = 64
@@ -39,10 +39,8 @@ dense1_size = 256
 
 # load data -----------------------------------------------
 data = pd.read_csv(fname)
-x_train_1000, x_test_1000, y_train_1000, y_test_1000 = train_test_split(
-        data['sequence'], data_1000['classification'], 
-        test_size=test_size, random_state=random_state
-        )
+x_train_1000, x_test_1000, y_train_1000, y_test_1000 = \
+train_test_split(data['sequence'], data['classification'], test_size=test_size, random_state=random_state)
 lb = LabelBinarizer()
 y_train = lb.fit_transform(y_train_1000)
 y_test = lb.transform(y_test_1000)
@@ -62,24 +60,16 @@ top_class = y_train.shape[1]
 
 # build model ---------------------------------------------
 model = Sequential()
-model.add(Embedding((
-    len(tokenizer.word_index)+1, embedding_dim, input_length=max_length
-    ))
-model.add(Conv1D(
-    filters=conv1_filter, kernel_size=conv1_kernel, padding='same', activation='relu'
-    ))
+model.add(Embedding(len(tokenizer.word_index)+1, embedding_dim, input_length=max_length))
+model.add(Conv1D(filters=conv1_filter, kernel_size=conv1_kernel, padding='same', activation='relu'))
 model.add(MaxPooling1D(pool_size=pool1_size))
-model.add(Conv1D(
-    filters=conv2_filter, kernel_size=conv2_kernel, padding='same', activation='relu'
-    ))
+model.add(Conv1D(filters=conv2_filter, kernel_size=conv2_kernel, padding='same', activation='relu'))
 model.add(MaxPooling1D(pool_size=pool2_size))
 model.add(GRU(GRU_output))
 model.add(Dropout(drop_prob))
 model.add(Dense(dense1_size, activation='relu'))
 model.add(Dense(top_class, activation='sigmoid'))
-modelcompile(
-        loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy']
-        )
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
 # train ---------------------------------------------------
