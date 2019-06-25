@@ -41,7 +41,7 @@ print(df.shape)
 # count numbers of instances per class
 cnt = Counter(df.classification)
 # select only K most common classes! - was 10 by default
-top_classes = 43
+top_classes = 34
 # sort classes
 sorted_classes = cnt.most_common()[:top_classes]
 classes = [c[0] for c in sorted_classes]
@@ -88,17 +88,17 @@ X = sequence.pad_sequences(X, maxlen=max_length)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=.2)
 
 
-embedding_dim = 8 # orig 8
+embedding_dim = 16 # orig 8
 
 # create the model
 model = Sequential()
 model.add(Embedding(len(tokenizer.word_index)+1, embedding_dim, input_length=max_length))
 
-model.add(Conv1D(filters=64, kernel_size=6, padding='same', activation='relu', dilation_rate=1))
+model.add(Conv1D(filters=128, kernel_size=6, padding='same', activation='relu', dilation_rate=1))
 # model.add(BatchNormalization())
 model.add(MaxPooling1D(pool_size=2))
 
-model.add(Conv1D(filters=32, kernel_size=3, padding='same', activation='relu')) 
+model.add(Conv1D(filters=64, kernel_size=3, padding='same', activation='relu')) 
 # model.add(BatchNormalization())
 model.add(MaxPooling1D(pool_size=2))
 
@@ -106,7 +106,7 @@ model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
 model.add(Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.001))) # 128
 # model.add(BatchNormalization())
-
+model.add(Dense(128, activation='relu', kernel_regularizer=regularizers.l2(0.001))) # 128
 # model.add(Dropout(0.5))
 
 model.add(Dense(top_classes, activation='softmax'))
@@ -116,77 +116,30 @@ print(model.summary())
 
 es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
 # epochs=15, # batch_size=128
-model.fit(X_train, y_train,  batch_size=128, verbose=1, validation_split=0.15, callbacks=[es], epochs=25)
+history = model.fit(X_train, y_train,  batch_size=128, verbose=1, validation_split=0.15, callbacks=[es], epochs=25)
 
 train_pred = model.predict(X_train)
 test_pred = model.predict(X_test)
 print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
 print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
 
-# Compute confusion matrix
-cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))
-
-# Plot normalized confusion matrix
-cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-np.set_printoptions(precision=2)
-plt.figure(figsize=(10,10))
-plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-plt.title('Confusion matrix')
-plt.colorbar()
-tick_marks = np.arange(len(lb.classes_))
-plt.xticks(tick_marks, lb.classes_, rotation=90)
-plt.yticks(tick_marks, lb.classes_)
-#for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-#    plt.text(j, i, format(cm[i, j], '.2f'), horizontalalignment="center", color="white" if cm[i, j] > cm.max() / 2. else "black")
-plt.ylabel('True label')
-plt.xlabel('Predicted label')
+# print(history.history.keys())
+# summarize history for accuracy
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
 plt.show()
-
-print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
-
-
-# from keras.layers import Conv1D, MaxPooling1D, Concatenate, Input
-# from keras.models import Sequential,Model
-
-# units = 256
-# num_filters = 32
-# filter_sizes=(3,5, 9,15,21)
-# conv_blocks = []
-
-# embedding_layer = Embedding(len(tokenizer.word_index)+1, embedding_dim, input_length=max_length)
-# es2 = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
-
-# sequence_input = Input(shape=(max_length,), dtype='int32')
-# embedded_sequences = embedding_layer(sequence_input)
-
-# z = Dropout(0.1)(embedded_sequences)
-
-# for sz in filter_sizes:
-#     conv = Conv1D(
-#         filters=num_filters,
-#         kernel_size=sz,
-#         padding="valid",
-#         activation="relu",
-#         strides=1)(z)
-#     conv = MaxPooling1D(pool_size=2)(conv)
-#     conv = Flatten()(conv)
-#     conv_blocks.append(conv)
-# z = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
-# z = Dropout(0.25)(z)
-# z = BatchNormalization()(z)
-# z = Dense(units, activation="relu")(z)
-# z = BatchNormalization()(z)
-# predictions = Dense(top_classes, activation="softmax")(z)
-# model2 = Model(sequence_input, predictions)
-# model2.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-# print(model2.summary())
-
-# model2.fit(X_train, y_train,  batch_size=64, verbose=1, validation_split=0.15,callbacks=[es],epochs=30)
-
-# train_pred = model2.predict(X_train)
-# test_pred = model2.predict(X_test)
-# print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
-# print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
+# summarize history for loss
+# plt.plot(history.history['loss'])
+# plt.plot(history.history['val_loss'])
+# plt.title('model loss')
+# plt.ylabel('loss')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
 
 # # Compute confusion matrix
 # cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))
@@ -208,5 +161,4 @@ print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis
 # plt.show()
 
 # print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
-
 
