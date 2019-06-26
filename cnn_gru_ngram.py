@@ -40,9 +40,9 @@ random_state = 150
 max_length = 512
 
 # hyperparameters -----------------------------------------
-num_epoch = 20
+num_epoch = 40
 batch_size = 256
-learning_rate = 0.003
+learning_rate = 0.0005
 
 conv1_filter = 128
 conv1_kernel = 6
