@@ -7,10 +7,12 @@ from keras.models import Sequential
 from keras.layers import GRU, Dense
 from keras.layers import Dropout, MaxPooling1D, Conv1D
 from keras.layers import Embedding, Input
+from keras.optimizers import Adam
 from keras.preprocessing import text, sequence
 from keras.preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
+from keras.callbacks import EarlyStopping
 # import matplotlib.pyplot as plt
 
 def create_ngram_set(input_list, ngram_value=2):
@@ -39,8 +41,8 @@ max_length = 512
 
 # hyperparameters -----------------------------------------
 num_epoch = 20
-batch_size = 128
-learn_rate = 0.001
+batch_size = 256
+learning_rate = 0.003
 
 conv1_filter = 128
 conv1_kernel = 6
@@ -52,7 +54,7 @@ pool2_size = 2
 
 GRU_output = 64
 
-drop_prob = 0.1
+drop_prob = 0.5
 
 dense1_size = 256
 
@@ -67,7 +69,7 @@ print('number of classes %d'%y_train.shape[1])
 
 # embedding ------------------------------------
 ngram_range = 3
-maxlen = 512
+maxlen = 128
 embedding_dims = 100
 
 tokenizer = Tokenizer(char_level=True)
@@ -108,17 +110,21 @@ model.add(Conv1D(filters=conv1_filter, kernel_size=conv1_kernel, padding='same',
 model.add(MaxPooling1D(pool_size=pool1_size))
 model.add(Conv1D(filters=conv2_filter, kernel_size=conv2_kernel, padding='same', activation='relu'))
 model.add(MaxPooling1D(pool_size=pool2_size))
+
+# model.add(Dense(512, activation='relu'))
+
 model.add(GRU(GRU_output))
 model.add(Dropout(drop_prob))
 model.add(Dense(dense1_size, activation='relu'))
 model.add(Dense(top_class, activation='sigmoid'))
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+adam = Adam(lr=learning_rate)
+model.compile(loss='categorical_crossentropy', optimizer=adam,  metrics=['accuracy'])
 model.summary()
 
 # train ---------------------------------------------------
+es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
 history = model.fit(x_train, y_train, validation_data=(x_test, y_test),
-        epochs=num_epoch, batch_size=batch_size)
-
+        epochs=num_epoch, batch_size=batch_size, callbacks=[es])
 #model.save('cnn_and_gru.h5')
 
 acc = history.history['acc']
