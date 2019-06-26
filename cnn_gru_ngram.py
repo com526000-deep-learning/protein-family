@@ -96,7 +96,7 @@ if ngram_range > 1:
 x_train = sequence.pad_sequences(x_train, maxlen=maxlen)
 x_test = sequence.pad_sequences(x_test, maxlen=maxlen)
 
-top_classes = y_train.shape[1]
+top_class = y_train.shape[1]
 # embedding_dim = 16
 
 
