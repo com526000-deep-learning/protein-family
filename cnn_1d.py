@@ -54,7 +54,7 @@ X_test = sequence.pad_sequences(X_test, maxlen=max_length)
 # In[9]:
 
 
-embedding_dim = 16
+embedding_dim = 11
 top_classes = y_train.shape[1]
 # create the model
 model = Sequential()
@@ -66,14 +66,14 @@ model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))
 model.add(Dense(top_classes, activation='softmax'))
-adam = Adam(lr=0.0005)
+adam = Adam(lr=0.001)
 model.compile(loss='categorical_crossentropy', optimizer=adam,  metrics=['accuracy'])
 print(model.summary())
 
 es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
-history = model.fit(X_train, y_train,  batch_size=128, verbose=1, validation_split=0.15, callbacks=[es], epochs=2)
+history = model.fit(X_train, y_train,  batch_size=128, verbose=1, validation_split=0.15, callbacks=[es], epochs=25)
 
-save_history(history, '1DCNN_10')
+save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']), '1DCNN_10')
 
 train_pred = model.predict(X_train)
 test_pred = model.predict(X_test)
@@ -81,10 +81,41 @@ print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(
 print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
 print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
 
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
+# plt.plot(history.history['acc'])
+# plt.plot(history.history['val_acc'])
+# plt.title('model acc')
+# plt.ylabel('acc')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+import itertools
+
+train_pred = model.predict(X_train)
+test_pred = model.predict(X_test)
+print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
+print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
+
+# Compute confusion matrix
+cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))
+
+# Plot normalized confusion matrix
+cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+np.set_printoptions(precision=2)
+plt.figure(figsize=(10,10))
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+plt.title('Confusion matrix')
+plt.colorbar()
+tick_marks = np.arange(len(lb.classes_))
+plt.xticks(tick_marks, lb.classes_, rotation=90)
+plt.yticks(tick_marks, lb.classes_)
+#for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+#    plt.text(j, i, format(cm[i, j], '.2f'), horizontalalignment="center", color="white" if cm[i, j] > cm.max() / 2. else "black")
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
 plt.show()
+
+print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))

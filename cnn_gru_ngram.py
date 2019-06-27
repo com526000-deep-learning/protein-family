@@ -12,8 +12,9 @@ from keras.preprocessing import text, sequence
 from keras.preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
+from save_history import save_history
 from keras.callbacks import EarlyStopping
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 def create_ngram_set(input_list, ngram_value=2):
     # >>> create_ngram_set([1, 4, 9, 4, 1, 4], ngram_value=2)
@@ -34,10 +35,10 @@ def add_ngram(sequences, token_indice, ngram_range=2):
     return new_sequences
 
 # data setup ----------------------------------------------
-fname = 'data_1000_max2000.csv'
+# fname = 'data_1000_max2000.csv'
+fname = 'data_top10_undersample.csv'
 test_size = 0.2
 random_state = 150
-max_length = 512
 
 # hyperparameters -----------------------------------------
 num_epoch = 40
@@ -69,7 +70,7 @@ print('number of classes %d'%y_train.shape[1])
 
 # embedding ------------------------------------
 ngram_range = 3
-maxlen = 128
+maxlen = 500
 embedding_dims = 100
 
 tokenizer = Tokenizer(char_level=True)
@@ -105,7 +106,6 @@ top_class = y_train.shape[1]
 # build model ---------------------------------------------
 model = Sequential()
 model.add(Embedding(len(tokenizer.word_index) + len(token_indice) + 1, embedding_dims, input_length = maxlen))
-# model.add(Embedding(len(tokenizer.word_index)+1, embedding_dim, input_length=max_length))
 model.add(Conv1D(filters=conv1_filter, kernel_size=conv1_kernel, padding='same', activation='relu'))
 model.add(MaxPooling1D(pool_size=pool1_size))
 model.add(Conv1D(filters=conv2_filter, kernel_size=conv2_kernel, padding='same', activation='relu'))
@@ -126,15 +126,16 @@ es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
 history = model.fit(x_train, y_train, validation_data=(x_test, y_test),
         epochs=num_epoch, batch_size=batch_size, callbacks=[es])
 #model.save('cnn_and_gru.h5')
+save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_acc']),\
+ 'cnn_gru_ngram_10')
 
-acc = history.history['acc']
-loss = history.history['loss']
-
-test_acc = history.history['val_acc']
-test_loss = history.history['val_loss']
-
-for i in range(len(acc)):
-    print('train-acc={}'.format(acc[i]), 'test-acc={}'.format(test_acc[i]))
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model acc')
+plt.ylabel('acc')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 
 
 ## plot result ---------------------------------------------
