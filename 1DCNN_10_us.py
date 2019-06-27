@@ -28,7 +28,8 @@ from save_history import save_history
 
 # In[3]:
 
-data_1000 = pd.read_csv('data_top10_undersample.csv')
+# data_1000 = pd.read_csv('data_top10_undersample.csv')
+data_1000 = pd.read_csv('data_1000_max2000.csv')
 
 
 # In[4]:
@@ -179,7 +180,8 @@ print(model.summary())
 
 history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, batch_size=256)
 
-save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']), '1DCNN_10_undersample')
+save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']),\
+ '1DCNN_34')
 # In[ ]:
 
 
