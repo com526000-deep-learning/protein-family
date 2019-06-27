@@ -70,7 +70,7 @@ print('number of classes %d'%y_train.shape[1])
 
 # embedding ------------------------------------
 ngram_range = 3
-maxlen = 500
+maxlen = 256
 embedding_dims = 100
 
 tokenizer = Tokenizer(char_level=True)
@@ -122,39 +122,39 @@ model.compile(loss='categorical_crossentropy', optimizer=adam,  metrics=['accura
 model.summary()
 
 # train ---------------------------------------------------
-es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
+es = EarlyStopping(monitor='val_acc', verbose=1, patience=3)
 history = model.fit(x_train, y_train, validation_data=(x_test, y_test),
         epochs=num_epoch, batch_size=batch_size, callbacks=[es])
 #model.save('cnn_and_gru.h5')
 save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_acc']),\
  'cnn_gru_ngram_10')
 
-plt.plot(history.history['acc'])
-plt.plot(history.history['val_acc'])
-plt.title('model acc')
-plt.ylabel('acc')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+import itertools
+
+train_pred = model.predict(x_train)
+test_pred = model.predict(x_test)
+print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
+print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
+print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
+
+# Compute confusion matrix
+cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))
+
+# Plot normalized confusion matrix
+cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+np.set_printoptions(precision=2)
+plt.figure(figsize=(10,10))
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+plt.title('Confusion matrix')
+plt.colorbar()
+tick_marks = np.arange(len(lb.classes_))
+plt.xticks(tick_marks, lb.classes_, rotation=90)
+plt.yticks(tick_marks, lb.classes_)
+#for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+#    plt.text(j, i, format(cm[i, j], '.2f'), horizontalalignment="center", color="white" if cm[i, j] > cm.max() / 2. else "black")
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
 plt.show()
-
-
-## plot result ---------------------------------------------
-#epochs = np.aranga(num_epoch)
-#
-#plt.plot(epochs, acc, label='train')
-#plt.plot(epochs, test_acc, label='test')
-#plt.xlabel('epochs')
-#plt.ylabel('acc')
-#plt.title('accuracy')
-#plt.legend()
-#plt.savefig('acc.png')
-#plt.close()
-#
-#plt.plot(epochs, loss, label='train')
-#plt.plot(epochs, test_loss, label='test')
-#plt.xlabel('epochs')
-#plt.ylabel('loss')
-#plt.title('learning curve')
-#plt.legend()
-#plt.savefig('loss.png')
-#plt.close()

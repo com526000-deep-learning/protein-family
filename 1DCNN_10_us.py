@@ -7,7 +7,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
-import seaborn as sns
+# import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
@@ -112,7 +112,6 @@ ngram_range = 4
 maxlen = 1024
 batch_size = 128
 embedding_dims = 22
-epochs = 10
 
 
 # In[38]:
@@ -184,8 +183,8 @@ save_history((history.history['acc'], history.history['val_acc'], history.histor
 # In[ ]:
 
 
-train_pred = model.predict(X_train)
-test_pred = model.predict(X_test)
+train_pred = model.predict(x_train)
+test_pred = model.predict(x_test)
 print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
 print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
 
