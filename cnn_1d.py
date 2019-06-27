@@ -22,9 +22,8 @@ from keras.optimizers import Adam
 from save_history import save_history
 
 
-data_1000 = pd.read_csv('data_top10_undersample.csv')
-# data_1000 = pd.read_csv('data_1000_max2000.csv')
-# data_1000 = pd.read_csv('data_1000_max1200.csv')
+# data_1000 = pd.read_csv('data_top10_undersample.csv')
+data_1000 = pd.read_csv('data_1000_max2000.csv')
 # data_1000.head()
 
 
@@ -73,7 +72,8 @@ print(model.summary())
 es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
 history = model.fit(X_train, y_train,  batch_size=128, verbose=1, validation_split=0.15, callbacks=[es], epochs=25)
 
-save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']), '1DCNN_10')
+save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']),\
+ '1DCNN_34')
 
 train_pred = model.predict(X_train)
 test_pred = model.predict(X_test)
@@ -117,5 +117,3 @@ plt.yticks(tick_marks, lb.classes_)
 plt.ylabel('True label')
 plt.xlabel('Predicted label')
 plt.show()
-
-print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
