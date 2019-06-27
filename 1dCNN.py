@@ -7,7 +7,7 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
-import seaborn as sns
+# import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
@@ -80,9 +80,6 @@ X_test = sequence.pad_sequences(X_test, maxlen=max_length)
 # print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
 # print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
 # print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
-
-
-# # In[ ]:
 
 
 

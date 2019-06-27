@@ -35,8 +35,8 @@ def add_ngram(sequences, token_indice, ngram_range=2):
     return new_sequences
 
 # data setup ----------------------------------------------
-# fname = 'data_1000_max2000.csv'
-fname = 'data_top10_undersample.csv'
+fname = 'data_1000_max2000.csv'
+# fname = 'data_top10_undersample.csv'
 test_size = 0.2
 random_state = 150
 
@@ -127,7 +127,7 @@ history = model.fit(x_train, y_train, validation_data=(x_test, y_test),
         epochs=num_epoch, batch_size=batch_size, callbacks=[es])
 #model.save('cnn_and_gru.h5')
 save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_acc']),\
- 'cnn_gru_ngram_10')
+ 'cnn_gru_ngram_34')
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
