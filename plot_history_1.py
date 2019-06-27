@@ -7,13 +7,14 @@ def plotFigure(df, name):
     acc_ts = df[1]
     plt.plot(np.arange(len(acc_ts)), acc_ts, label = name)    
 
+fname = "1DCNN_34"
+df = pickle.load(open('{}.pickle'.format(fname), 'rb'))
+plotFigure(df, "1D-CNN")
+
 fname = "1DCNN_undersample_34"
 df = pickle.load(open('{}.pickle'.format(fname), 'rb'))
 plotFigure(df, "1D-CNN, 4-gram")
 
-fname = "1DCNN_34"
-df = pickle.load(open('{}.pickle'.format(fname), 'rb'))
-plotFigure(df, "1D-CNN")
 
 fname = "GRU_ngram_34"
 df = pickle.load(open('{}.pickle'.format(fname), 'rb'))
