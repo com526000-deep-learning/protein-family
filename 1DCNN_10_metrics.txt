@@ -1,0 +1,18 @@
+train-acc = 0.9774057337580562
+test-acc = 0.9185150694209279
+                               precision    recall  f1-score   support
+
+                    HYDROLASE       0.81      0.82      0.81      3032
+HYDROLASE/HYDROLASE INHIBITOR       0.86      0.91      0.88      2190
+                IMMUNE SYSTEM       0.96      0.96      0.96      3169
+                        LYASE       0.97      0.96      0.97      2319
+               OXIDOREDUCTASE       0.99      0.92      0.95      3191
+                TRANSCRIPTION       0.85      0.93      0.89      1753
+                  TRANSFERASE       0.89      0.92      0.90      3110
+            TRANSPORT PROTEIN       0.98      0.92      0.95      1642
+                VIRAL PROTEIN       0.95      0.92      0.94      1753
+                        VIRUS       0.98      0.97      0.97      1465
+
+                    micro avg       0.92      0.92      0.92     23624
+                    macro avg       0.92      0.92      0.92     23624
+                 weighted avg       0.92      0.92      0.92     23624
