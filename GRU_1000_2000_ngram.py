@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.preprocessing import LabelBinarizer
+
 from keras.preprocessing import text, sequence
 from keras.preprocessing.text import Tokenizer
 from keras.models import Sequential
@@ -14,6 +15,7 @@ from keras.layers import LSTM
 from keras.layers.embeddings import Embedding
 from keras.layers import GRU,RNN,SimpleRNN,Dropout,TimeDistributed,RepeatVector,Bidirectional
 from keras import optimizers
+from keras.callbacks import EarlyStopping
 
 data_1000 = pd.read_csv('data_1000_max2000.csv')
 data_1000.head()
@@ -49,9 +51,9 @@ def add_ngram(sequences, token_indice, ngram_range=2):
 ngram_range = 3
 maxlen = 512
 # maxlen = 1024
-batch_size = 128
-embedding_dims = 22
-epochs = 10
+batch_size = 512
+embedding_dims = 100
+epochs = 50
 
 tokenizer = Tokenizer(char_level=True)
 tokenizer.fit_on_texts(x_train)
@@ -91,9 +93,9 @@ print('x_test shape:', x_test.shape)
 
 top_classes = y_train.shape[1]
 dense_size = 256
-num_hidden_units = 128  # Number of hidden units of the RNN
+num_hidden_units = 100  # Number of hidden units of the RNN
 Dropout_rate = 0.5
-learning_rate = 0.01
+learning_rate = 0.001
 
 # create the model
 model = Sequential()
@@ -109,21 +111,30 @@ model.add(Embedding(len(tokenizer.word_index) + len(token_indice) + 1, embedding
 # adam = optimizers.Adam(lr=learning_rate)
 # model.compile(loss = 'categorical_crossentropy', optimizer = adam, metrics = ['accuracy'])
 
-model.add(GRU(num_hidden_units,return_sequences=True,dropout=0.1))
+# model.add(GRU(num_hidden_units,return_sequences=True))
+model.add(GRU(num_hidden_units))
+# model.add(GRU(num_hidden_units,return_sequences=False,))#, input_shape=(timesteps, num_input)
 model.add(Dropout(rate=Dropout_rate, noise_shape=None, seed=None))
-model.add(GRU(num_hidden_units,return_sequences=False,))#, input_shape=(timesteps, num_input)
+model.add(Dense(256, activation='relu'))
 model.add(Dense(top_classes, activation='softmax'))
 # model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 adam = optimizers.Adam(lr=learning_rate)
-model.compile(loss = 'categorical_crossentropy', optimizer = adam, metrics = ['accuracy'])
+history = model.compile(loss = 'categorical_crossentropy', optimizer = adam, metrics = ['accuracy'])
 
 print(model.summary())
 
-model.fit(x_train, y_train, batch_size = batch_size, epochs = epochs, shuffle = True)
+es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
+model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size = batch_size, epochs = epochs, shuffle = True, callbacks=[es])
 
-test_loss = model.evaluate(x_test, y_test)
-print(test_loss)
+# test_loss = model.evaluate(x_test, y_test)
+# print(test_loss)
 
+acc = np.mean(history.history['acc'])
+loss = np.mean(history.history['loss'])
+test_acc = np.mean(history.history['val_acc'])
+test_loss = np.mean(history.history['val_loss'])
+
+print('train-acc={}, test-acc={}'.format(acc, test_acc))
 
 # model = Sequential()
 # model.add(Embedding(len(tokenizer.word_index)+len(token_indice)+1, embedding_dims, input_length=maxlen))
