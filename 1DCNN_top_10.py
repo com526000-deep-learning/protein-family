@@ -1,13 +1,6 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
@@ -19,74 +12,27 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv1D, MaxPooling1D, Flatten
 from keras.layers import LSTM
 from keras.layers.embeddings import Embedding
+from keras.callbacks import EarlyStopping
+from keras import optimizers
 
-
-# In[3]:
-
-
-data_1000 = pd.read_csv('data_1000_max2000.csv')
-
-
-# In[4]:
-
+data_1000 = pd.read_csv('data_top10_undersample.csv')
 
 data_1000.head()
 
-
-# In[33]:
-
-
 x_train, x_test,y_train_1000,y_test_1000 = train_test_split(data_1000['sequence'], data_1000['classification'], test_size = 0.2, random_state = 123)
-
-
-# In[34]:
-
 
 print(x_train.shape)
 print(x_test.shape)
-
-
-# In[35]:
-
 
 lb = LabelBinarizer()
 y_train = lb.fit_transform(y_train_1000)
 y_test = lb.transform(y_test_1000)
 print('number of classes %d'%y_train.shape[1])
 
-
-# In[36]:
-
-
 def create_ngram_set(input_list, ngram_value=2):
-    """
-    Extract a set of n-grams from a list of integers.
-
-    >>> create_ngram_set([1, 4, 9, 4, 1, 4], ngram_value=2)
-    {(4, 9), (4, 1), (1, 4), (9, 4)}
-
-    >>> create_ngram_set([1, 4, 9, 4, 1, 4], ngram_value=3)
-    [(1, 4, 9), (4, 9, 4), (9, 4, 1), (4, 1, 4)]
-    """
     return set(zip(*[input_list[i:] for i in range(ngram_value)]))
 
-
 def add_ngram(sequences, token_indice, ngram_range=2):
-    """
-    Augment the input list of list (sequences) by appending n-grams values.
-
-    Example: adding bi-gram
-    >>> sequences = [[1, 3, 4, 5], [1, 3, 7, 9, 2]]
-    >>> token_indice = {(1, 3): 1337, (9, 2): 42, (4, 5): 2017}
-    >>> add_ngram(sequences, token_indice, ngram_range=2)
-    [[1, 3, 4, 5, 1337, 2017], [1, 3, 7, 9, 2, 1337, 42]]
-
-    Example: adding tri-gram
-    >>> sequences = [[1, 3, 4, 5], [1, 3, 7, 9, 2]]
-    >>> token_indice = {(1, 3): 1337, (9, 2): 42, (4, 5): 2017, (7, 9, 2): 2018}
-    >>> add_ngram(sequences, token_indice, ngram_range=3)
-    [[1, 3, 4, 5, 1337, 2017], [1, 3, 7, 9, 2, 1337, 42, 2018]]
-    """
     new_sequences = []
     for input_list in sequences:
         new_list = input_list[:]
@@ -99,20 +45,14 @@ def add_ngram(sequences, token_indice, ngram_range=2):
 
     return new_sequences
 
-
-# In[37]:
-
-
 ngram_range = 3
 #max_features = 26
 maxlen = 1024
-batch_size = 128
-embedding_dims = 22
-epochs = 10
-
-
-# In[38]:
-
+batch_size = 256
+embedding_dims = 100
+epochs = 1
+# epochs = 10
+learning_rate = 0.01
 
 tokenizer = Tokenizer(char_level=True)
 tokenizer.fit_on_texts(x_train)
@@ -150,28 +90,6 @@ x_test = sequence.pad_sequences(x_test, maxlen=maxlen)
 print('x_train shape:', x_train.shape)
 print('x_test shape:', x_test.shape)
 
-
-# In[ ]:
-
-
-'''
-# maximum length of sequence, everything afterwards is discarded
-maxlen = 512
-
-#create and fit tokenizer
-tokenizer = Tokenizer(char_level=True)
-tokenizer.fit_on_texts(X_train_1000)
-#represent input data as word rank number sequences
-X_train = tokenizer.texts_to_sequences(X_train_1000)
-X_train = sequence.pad_sequences(X_train, maxlen=maxlen)
-X_test = tokenizer.texts_to_sequences(X_test_1000)
-X_test = sequence.pad_sequences(X_test, maxlen=maxlen)
-'''
-
-
-# In[39]:
-
-
 #embedding_dims = 16
 top_classes = y_train.shape[1]
 # create the model
@@ -184,10 +102,21 @@ model.add(MaxPooling1D(pool_size=2))
 model.add(Flatten())
 model.add(Dense(256, activation='relu'))
 model.add(Dense(top_classes, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+adam = optimizers.Adam(lr=learning_rate)
+history = model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['accuracy'])
 print(model.summary())
 
-model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, batch_size=128)
+es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
+model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, batch_size=128, callbacks=[es])
+
+
+# acc = np.mean(history['acc'])
+# loss = np.mean(history['loss'])
+# test_acc = np.mean(history['val_acc'])
+# test_loss = np.mean(history['val_loss'])
+
+# print('train-acc={}, test-acc={}'.format(acc, test_acc))
 
 train_pred = model.predict(x_train)
 test_pred = model.predict(x_test)
