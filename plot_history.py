@@ -12,7 +12,7 @@ def plotFigure(y_train, y_test, fname, name):
     plt.savefig(fname + "_" + name)
     plt.close("all")
 
-fname = "cnn_gru_ngram_10"
+fname = "GRU_ngram_10_undersample"
 
 df = pickle.load(open('{}.pickle'.format(fname), 'rb'))
 acc_tr = df[0]
