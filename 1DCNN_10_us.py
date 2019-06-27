@@ -181,7 +181,7 @@ print(model.summary())
 history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, batch_size=256)
 
 save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']),\
- '1DCNN_34')
+ '1DCNN_undersample_34')
 # In[ ]:
 
 

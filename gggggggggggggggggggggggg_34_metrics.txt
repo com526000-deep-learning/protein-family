@@ -1,0 +1,42 @@
+train-acc = 0.9580181731945381
+test-acc = 0.8744633050424363
+                                         precision    recall  f1-score   support
+
+                              APOPTOSIS       0.91      0.85      0.88       253
+                          CELL ADHESION       0.84      0.80      0.82       518
+                             CELL CYCLE       0.86      0.74      0.80       394
+                              CHAPERONE       0.91      0.89      0.90       440
+                        DE NOVO PROTEIN       0.94      0.85      0.89       310
+                    DNA BINDING PROTEIN       0.85      0.79      0.82       561
+                     ELECTRON TRANSPORT       0.90      0.90      0.90       411
+                        GENE REGULATION       0.88      0.79      0.83       292
+                                HORMONE       0.97      0.94      0.95       292
+                              HYDROLASE       0.84      0.93      0.88      6955
+          HYDROLASE/HYDROLASE INHIBITOR       0.80      0.60      0.68      1060
+                          IMMUNE SYSTEM       0.96      0.93      0.94      2718
+                              ISOMERASE       0.96      0.94      0.95      1024
+                                 LIGASE       0.87      0.89      0.88       772
+                                  LYASE       0.96      0.95      0.95      1787
+                       MEMBRANE PROTEIN       0.86      0.74      0.80       663
+                  METAL BINDING PROTEIN       0.79      0.77      0.78       548
+                         OXIDOREDUCTASE       0.93      0.95      0.94      4649
+OXIDOREDUCTASE/OXIDOREDUCTASE INHIBITOR       0.71      0.40      0.51       229
+                        PROTEIN BINDING       0.68      0.67      0.67       853
+                      PROTEIN TRANSPORT       0.82      0.74      0.78       417
+                    RNA BINDING PROTEIN       0.85      0.72      0.78       353
+                      SIGNALING PROTEIN       0.75      0.77      0.76      1117
+  STRUCTURAL GENOMICS, UNKNOWN FUNCTION       0.79      0.74      0.77       660
+                     STRUCTURAL PROTEIN       0.86      0.79      0.82       516
+                  SUGAR BINDING PROTEIN       0.94      0.92      0.93       627
+                                  TOXIN       0.92      0.84      0.88       458
+                          TRANSCRIPTION       0.80      0.85      0.83      1560
+                            TRANSFERASE       0.89      0.94      0.91      5917
+      TRANSFERASE/TRANSFERASE INHIBITOR       0.82      0.57      0.67       621
+                      TRANSPORT PROTEIN       0.84      0.86      0.85      1160
+                       UNKNOWN FUNCTION       0.80      0.81      0.81       517
+                          VIRAL PROTEIN       0.90      0.89      0.89      1137
+                                  VIRUS       0.96      0.88      0.92       271
+
+                              micro avg       0.87      0.87      0.87     40060
+                              macro avg       0.86      0.81      0.83     40060
+                           weighted avg       0.87      0.87      0.87     40060
