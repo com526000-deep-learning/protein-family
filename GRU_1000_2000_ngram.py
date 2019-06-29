@@ -16,8 +16,10 @@ from keras.layers.embeddings import Embedding
 from keras.layers import GRU,RNN,SimpleRNN,Dropout,TimeDistributed,RepeatVector,Bidirectional
 from keras import optimizers
 from keras.callbacks import EarlyStopping
+from save_history import save_history
 
 data_1000 = pd.read_csv('data_1000_max2000.csv')
+# data_1000 = pd.read_csv('data_top10_undersample.csv')
 data_1000.head()
 
 x_train, x_test,y_train_1000,y_test_1000 = train_test_split(data_1000['sequence'], data_1000['classification'], test_size = 0.2, random_state = 123)
@@ -119,43 +121,43 @@ model.add(Dense(256, activation='relu'))
 model.add(Dense(top_classes, activation='softmax'))
 # model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 adam = optimizers.Adam(lr=learning_rate)
-history = model.compile(loss = 'categorical_crossentropy', optimizer = adam, metrics = ['accuracy'])
+model.compile(loss = 'categorical_crossentropy', optimizer = adam, metrics = ['accuracy'])
 
 print(model.summary())
 
-es = EarlyStopping(monitor='val_acc', verbose=1, patience=4)
-model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size = batch_size, epochs = epochs, shuffle = True, callbacks=[es])
+es = EarlyStopping(monitor='val_acc', verbose=1, patience=3)
+history = model.fit(x_train, y_train, validation_data=(x_test, y_test), batch_size = batch_size, epochs = epochs, shuffle = True, callbacks=[es])
 
-# test_loss = model.evaluate(x_test, y_test)
-# print(test_loss)
+save_history((history.history['acc'], history.history['val_acc'], history.history['loss'], history.history['val_loss']),\
+ 'GRU_ngram_34')
+# In[ ]:
 
-acc = np.mean(history.history['acc'])
-loss = np.mean(history.history['loss'])
-test_acc = np.mean(history.history['val_acc'])
-test_loss = np.mean(history.history['val_loss'])
 
-print('train-acc={}, test-acc={}'.format(acc, test_acc))
+train_pred = model.predict(x_train)
+test_pred = model.predict(x_test)
+print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
+print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
 
-# model = Sequential()
-# model.add(Embedding(len(tokenizer.word_index)+len(token_indice)+1, embedding_dims, input_length=maxlen))
+# Compute confusion matrix
+cm = confusion_matrix(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))
 
-# model.add(Conv1D(filters=128, kernel_size=6, padding='same', activation='relu'))
-# model.add(MaxPooling1D(pool_size=2))
+# Plot normalized confusion matrix
+cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+np.set_printoptions(precision=2)
+plt.figure(figsize=(10,10))
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+plt.title('Confusion matrix')
+plt.colorbar()
+tick_marks = np.arange(len(lb.classes_))
+plt.xticks(tick_marks, lb.classes_, rotation=90)
+plt.yticks(tick_marks, lb.classes_)
+#for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+#    plt.text(j, i, format(cm[i, j], '.2f'), horizontalalignment="center", color="white" if cm[i, j] > cm.max() / 2. else "black")
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
+plt.show()
 
-# model.add(Conv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
-# model.add(MaxPooling1D(pool_size=2))
 
-# model.add(Flatten())
-# model.add(Dense(256, activation='relu'))
-# model.add(Dense(top_classes, activation='softmax'))
 
-# model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-# print(model.summary())
+print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
 
-# model.fit(x_train, y_train, validation_data=(c), epochs=10, batch_size=128)
-
-# train_pred = model.predict(x_train)
-# test_pred = model.predict(x_test)
-# print("train-acc = " + str(accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_pred, axis=1))))
-# print("test-acc = " + str(accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1))))
-# print(classification_report(np.argmax(y_test, axis=1), np.argmax(test_pred, axis=1), target_names=lb.classes_))
