@@ -2,8 +2,6 @@
 # coding: utf-8
 
 # In[1]:
-
-
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
