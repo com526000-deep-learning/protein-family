@@ -5,7 +5,15 @@ Classify the protein structures through the sequences of amino acid on the Resea
 - 1d CNN with 4-gram
 - GRU with 3-gram
 - 1d CNN + GRU with 3-gram
-and other not-so-great DNNs...
+- other experimenting DNNs...
 
-Result:
-Above 0.97 F1-score on 10 classes of protein structures using 1d CNN with 4-gram.
+To run them, you need these libraries:
+- pandas
+- numpy
+- matplotlib
+- sklearn
+- Keras
+
+Best result:
+Achieve 0.88 and 0.84 F1-score on 10 and 34 classes of protein structures using 1d CNN with 4-gram, respectively.
+
